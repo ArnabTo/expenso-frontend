@@ -1,20 +1,20 @@
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GluestackUIProvider, Text, Box } from '@gluestack-ui/themed';
+import { config } from '@gluestack-ui/config';
+import { RootNavigator } from './src/navigation';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+
+// Set up React Query client
+const queryClient = new QueryClient();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <QueryClientProvider client={queryClient}>
+      <GluestackUIProvider config={config}>
+        <RootNavigator />
+        <StatusBar style="auto" />
+      </GluestackUIProvider>
+    </QueryClientProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
