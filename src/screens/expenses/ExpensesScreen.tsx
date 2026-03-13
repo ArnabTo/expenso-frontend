@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { FlatList, RefreshControl } from 'react-native';
-import { Box, VStack, HStack, Text, Heading, Spinner, Fab, FabIcon } from '@gluestack-ui/themed';
-import { Plus } from 'lucide-react-native';
+import { Box, VStack, HStack, Text, Heading, Spinner, Fab } from '@gluestack-ui/themed';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { PlusSignIcon } from '@hugeicons/core-free-icons';
 import { useExpenses } from '../../hooks/useExpenses';
 import { AddExpenseModal } from '../../components/AddExpenseModal';
 
@@ -59,7 +60,7 @@ export default function ExpensesScreen() {
                 bg="$indigo600"
                 onPress={() => setModalVisible(true)}
             >
-                <FabIcon as={Plus} color="$white" />
+                <HugeiconsIcon icon={PlusSignIcon} size={24} color="#FFFFFF" />
             </Fab>
 
             <AddExpenseModal visible={modalVisible} onClose={() => setModalVisible(false)} />

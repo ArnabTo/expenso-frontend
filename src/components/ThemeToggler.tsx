@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { TouchableOpacity, Animated, StyleSheet } from 'react-native';
-import { Moon, Sun } from 'lucide-react-native';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { Moon01Icon, Sun01Icon } from '@hugeicons/core-free-icons';
 import { useThemeStore } from '../store/themeStore';
 import { animations } from '../theme/animations';
 
@@ -58,9 +59,9 @@ export const ThemeToggler: React.FC = () => {
                 ]}
             >
                 {isDark ? (
-                    <Moon color={theme.primary} size={24} fill={theme.primary} />
+                    <HugeiconsIcon icon={Moon01Icon} size={24} color={theme.secondary} />
                 ) : (
-                    <Sun color={theme.primary} size={24} fill={theme.primary} />
+                    <HugeiconsIcon icon={Sun01Icon} size={24} color={theme.secondary} />
                 )}
             </Animated.View>
         </TouchableOpacity>

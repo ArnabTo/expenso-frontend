@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
 import {
-    VStack,
-    Heading,
-    Text,
-    Input,
-    InputField,
-    Button,
-    ButtonText,
-    Box,
-    Link,
-    LinkText,
-    Spinner,
-    Toast,
-    ToastTitle,
-    useToast,
-} from '@gluestack-ui/themed';
+    View, Text, TextInput, TouchableOpacity,
+    StyleSheet, ActivityIndicator, KeyboardAvoidingView,
+    Platform, ScrollView, StatusBar,
+} from 'react-native';
+import { useThemeStore } from '../../store/themeStore';
+import { ThemeToggler } from '../../components/ThemeToggler';
 import { authService } from '../../services/auth';
+import { fonts } from '../../theme/typography';
 
 export default function RegisterScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
@@ -23,21 +15,19 @@ export default function RegisterScreen({ navigation }: any) {
     const [password, setPassword] = useState('');
     const [rePassword, setRePassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const toast = useToast();
+    const [error, setError] = useState('');
+    const { theme } = useThemeStore();
 
     const handleRegister = async () => {
-        if (!email || !username || !password || password !== rePassword) {
-            toast.show({
-                placement: 'top',
-                render: ({ id }) => (
-                    <Toast bg="$error700" id={id}>
-                        <ToastTitle color="$white">Please fill all fields correctly.</ToastTitle>
-                    </Toast>
-                ),
-            });
+        if (!email || !username || !password || !rePassword) {
+            setError('Please fill in all fields.');
             return;
         }
-
+        if (password !== rePassword) {
+            setError('Passwords do not match.');
+            return;
+        }
+        setError('');
         setLoading(true);
         try {
             await authService.register({
@@ -45,88 +35,228 @@ export default function RegisterScreen({ navigation }: any) {
                 username,
                 password,
                 re_password: rePassword,
-                currency: 'USD'
+                currency: 'USD',
             });
-            // Navigation switches automatically via Zustand
-        } catch (error: any) {
-            toast.show({
-                placement: 'top',
-                render: ({ id }) => (
-                    <Toast bg="$error700" id={id}>
-                        <ToastTitle color="$white">Registration failed.</ToastTitle>
-                    </Toast>
-                ),
-            });
+        } catch {
+            setError('Registration failed. Email or username may already be in use.');
         } finally {
             setLoading(false);
         }
     };
 
+    const inputStyle = [
+        styles.input,
+        {
+            backgroundColor: theme.card,
+            borderColor: theme.border,
+            color: theme.text,
+            fontFamily: fonts.regular,
+        },
+    ];
+
     return (
-        <Box flex={1} bg="$backgroundLight0" justifyContent="center" px="$6">
-            <VStack space="xl">
-                <VStack space="xs">
-                    <Heading size="3xl" color="$textLight900">Create Account</Heading>
-                    <Text color="$textLight500">Start managing your finances today</Text>
-                </VStack>
+        <View style={[styles.root, { backgroundColor: theme.background }]}>
+            <StatusBar
+                barStyle={theme.background === '#1C1C1E' ? 'light-content' : 'dark-content'}
+                backgroundColor={theme.background}
+            />
 
-                <VStack space="lg">
-                    <Input variant="outline" size="md">
-                        <InputField
-                            placeholder="Username"
-                            value={username}
-                            onChangeText={setUsername}
-                            autoCapitalize="none"
-                        />
-                    </Input>
+            {/* Theme Toggle */}
+            <View style={styles.topBar}>
+                <ThemeToggler />
+            </View>
 
-                    <Input variant="outline" size="md">
-                        <InputField
-                            placeholder="Email"
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                        />
-                    </Input>
-
-                    <Input variant="outline" size="md">
-                        <InputField
-                            placeholder="Password"
-                            type="password"
-                            value={password}
-                            onChangeText={setPassword}
-                        />
-                    </Input>
-
-                    <Input variant="outline" size="md">
-                        <InputField
-                            placeholder="Confirm Password"
-                            type="password"
-                            value={rePassword}
-                            onChangeText={setRePassword}
-                        />
-                    </Input>
-                </VStack>
-
-                <Button
-                    size="lg"
-                    variant="solid"
-                    action="primary"
-                    onPress={handleRegister}
-                    isDisabled={loading}
-                    bg="$indigo600"
+            <KeyboardAvoidingView
+                style={styles.flex}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.scroll}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
                 >
-                    {loading ? <Spinner color="$white" /> : <ButtonText>Sign Up</ButtonText>}
-                </Button>
+                    {/* Brand */}
+                    <View style={styles.brandRow}>
+                        <View style={[styles.brandDot, { backgroundColor: theme.teal }]} />
+                        <Text style={[styles.brandName, { color: theme.teal, fontFamily: fonts.headingExtraBold }]}>
+                            Expenso
+                        </Text>
+                    </View>
 
-                <Box flexDirection="row" justifyContent="center">
-                    <Text size="sm" color="$textLight500">Already have an account? </Text>
-                    <Link onPress={() => navigation.goBack()}>
-                        <LinkText size="sm" color="$indigo600" fontWeight="$bold">Sign In</LinkText>
-                    </Link>
-                </Box>
-            </VStack>
-        </Box>
+                    {/* Heading */}
+                    <Text style={[styles.heading, { color: theme.text, fontFamily: fonts.headingBold }]}>
+                        Create account
+                    </Text>
+                    <Text style={[styles.subheading, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
+                        Start managing your finances today
+                    </Text>
+
+                    {/* Fields */}
+                    <View style={styles.fields}>
+                        <View style={styles.fieldGroup}>
+                            <Text style={[styles.label, { color: theme.textSecondary, fontFamily: fonts.medium }]}>Username</Text>
+                            <TextInput
+                                style={inputStyle}
+                                placeholder="your_username"
+                                placeholderTextColor={theme.textSecondary}
+                                value={username}
+                                onChangeText={setUsername}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                            />
+                        </View>
+
+                        <View style={styles.fieldGroup}>
+                            <Text style={[styles.label, { color: theme.textSecondary, fontFamily: fonts.medium }]}>Email</Text>
+                            <TextInput
+                                style={inputStyle}
+                                placeholder="you@example.com"
+                                placeholderTextColor={theme.textSecondary}
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                            />
+                        </View>
+
+                        <View style={styles.fieldGroup}>
+                            <Text style={[styles.label, { color: theme.textSecondary, fontFamily: fonts.medium }]}>Password</Text>
+                            <TextInput
+                                style={inputStyle}
+                                placeholder="••••••••"
+                                placeholderTextColor={theme.textSecondary}
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                            />
+                        </View>
+
+                        <View style={styles.fieldGroup}>
+                            <Text style={[styles.label, { color: theme.textSecondary, fontFamily: fonts.medium }]}>Confirm Password</Text>
+                            <TextInput
+                                style={inputStyle}
+                                placeholder="••••••••"
+                                placeholderTextColor={theme.textSecondary}
+                                value={rePassword}
+                                onChangeText={setRePassword}
+                                secureTextEntry
+                            />
+                        </View>
+
+                        {error ? (
+                            <Text style={[styles.errorText, { color: theme.error, fontFamily: fonts.regular }]}>
+                                {error}
+                            </Text>
+                        ) : null}
+                    </View>
+
+                    {/* CTA */}
+                    <TouchableOpacity
+                        style={[styles.button, { backgroundColor: theme.teal, opacity: loading ? 0.75 : 1 }]}
+                        onPress={handleRegister}
+                        activeOpacity={0.85}
+                        disabled={loading}
+                    >
+                        {loading
+                            ? <ActivityIndicator color="#fff" />
+                            : <Text style={[styles.buttonText, { fontFamily: fonts.semiBold }]}>Create Account</Text>
+                        }
+                    </TouchableOpacity>
+
+                    {/* Footer */}
+                    <View style={styles.footer}>
+                        <Text style={[styles.footerText, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
+                            Already have an account?{'  '}
+                        </Text>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Text style={[styles.footerLink, { color: theme.teal, fontFamily: fonts.semiBold }]}>
+                                Sign In
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    root: { flex: 1 },
+    flex: { flex: 1 },
+    topBar: {
+        paddingTop: 52,
+        paddingHorizontal: 24,
+        alignItems: 'flex-end',
+    },
+    scroll: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 28,
+        paddingBottom: 48,
+    },
+    brandRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 32,
+    },
+    brandDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginRight: 8,
+    },
+    brandName: {
+        fontSize: 18,
+        letterSpacing: 0.5,
+    },
+    heading: {
+        fontSize: 34,
+        marginBottom: 8,
+    },
+    subheading: {
+        fontSize: 15,
+        marginBottom: 36,
+        lineHeight: 22,
+    },
+    fields: {
+        gap: 18,
+        marginBottom: 28,
+    },
+    fieldGroup: { gap: 6 },
+    label: { fontSize: 13 },
+    input: {
+        height: 52,
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        fontSize: 15,
+    },
+    errorText: {
+        fontSize: 13,
+        marginTop: -8,
+    },
+    button: {
+        height: 54,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+        shadowColor: '#00BFA5',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.35,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    footerText: { fontSize: 14 },
+    footerLink: { fontSize: 14 },
+});

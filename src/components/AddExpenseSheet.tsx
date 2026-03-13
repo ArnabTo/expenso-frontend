@@ -9,7 +9,8 @@ import {
     Modal,
 } from 'react-native';
 import { Text } from '@gluestack-ui/themed';
-import { Plus, X, ChevronDown } from 'lucide-react-native';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { PlusSignIcon, Cancel01Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons';
 import { BottomSheet } from './BottomSheet';
 import { useThemeStore } from '../store/themeStore';
 import { useCategories, useAddExpense } from '../hooks/useExpenses';
@@ -159,7 +160,7 @@ export const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({ visible, onClo
                         <Text style={[styles.dropdownText, { color: category ? theme.text : theme.textSecondary }]}>
                             {selectedCategoryName}
                         </Text>
-                        <ChevronDown size={20} color={theme.textSecondary} />
+                        <HugeiconsIcon icon={ArrowDown01Icon} size={20} color={theme.textSecondary} />
                     </TouchableOpacity>
                 </View>
 
@@ -185,7 +186,7 @@ export const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({ visible, onClo
                 <TouchableOpacity
                     onPress={handleSubmit}
                     disabled={isSubmitting}
-                    style={[styles.submitButton, { backgroundColor: theme.primary, opacity: isSubmitting ? 0.6 : 1 }]}
+                    style={[styles.submitButton, { backgroundColor: theme.secondary, opacity: isSubmitting ? 0.6 : 1 }]}
                 >
                     <Text style={styles.submitButtonText}>
                         {isSubmitting ? 'Adding...' : 'Add Expense'}
@@ -219,8 +220,8 @@ export const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({ visible, onClo
                                     }}
                                     style={styles.addCategoryHeaderButton}
                                 >
-                                    <Plus size={18} color={theme.primary} />
-                                    <Text style={[styles.addCategoryText, { color: theme.primary }]}>Add New</Text>
+                                    <HugeiconsIcon icon={PlusSignIcon} size={18} color={theme.secondary} />
+                                    <Text style={[styles.addCategoryText, { color: theme.secondary }]}>Add New</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -235,19 +236,19 @@ export const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({ visible, onClo
                                         style={[
                                             styles.dropdownItem,
                                             { borderBottomColor: theme.border },
-                                            category === cat.id.toString() && { backgroundColor: `${theme.primary}10` },
+                                            category === cat.id.toString() && { backgroundColor: `${theme.secondary}10` },
                                         ]}
                                     >
                                         <Text
                                             style={[
                                                 styles.dropdownItemText,
-                                                { color: category === cat.id.toString() ? theme.primary : theme.text },
+                                                { color: category === cat.id.toString() ? theme.secondary : theme.text },
                                             ]}
                                         >
                                             {cat.name}
                                         </Text>
                                         {category === cat.id.toString() && (
-                                            <View style={[styles.checkMark, { backgroundColor: theme.primary }]} />
+                                            <View style={[styles.checkMark, { backgroundColor: theme.secondary }]} />
                                         )}
                                     </TouchableOpacity>
                                 ))}
@@ -274,7 +275,7 @@ export const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({ visible, onClo
                             <View style={styles.modalHeader}>
                                 <Text style={[styles.modalTitle, { color: theme.text }]}>Add New Category</Text>
                                 <TouchableOpacity onPress={() => setShowAddCategory(false)}>
-                                    <X size={24} color={theme.textSecondary} />
+                                    <HugeiconsIcon icon={Cancel01Icon} size={24} color={theme.textSecondary} />
                                 </TouchableOpacity>
                             </View>
 
@@ -292,7 +293,7 @@ export const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({ visible, onClo
 
                             <TouchableOpacity
                                 onPress={handleAddCategory}
-                                style={[styles.modalButton, { backgroundColor: theme.primary }]}
+                                style={[styles.modalButton, { backgroundColor: theme.secondary }]}
                             >
                                 <Text style={styles.modalButtonText}>Add Category</Text>
                             </TouchableOpacity>

@@ -4,9 +4,11 @@ import { View, ActivityIndicator } from 'react-native';
 import { AuthStack } from './AuthStack';
 import { AppTabs } from './AppTabs';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 
 export const RootNavigator = () => {
     const { user, accessToken, isLoading, initialize } = useAuthStore();
+    const { theme } = useThemeStore();
 
     useEffect(() => {
         initialize();
@@ -14,16 +16,18 @@ export const RootNavigator = () => {
 
     if (isLoading) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#6366f1" />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.primary }}>
+                <ActivityIndicator size="large" color={theme.teal} />
             </View>
         );
     }
 
     return (
-        <NavigationContainer>
-            {/* If we have a token (or user), show Main App Tab, else show Login/Register */}
-            {accessToken ? <AppTabs /> : <AuthStack />}
-        </NavigationContainer>
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
+            <NavigationContainer>
+                {/* If there is a token (or user), show Main App Tab, else show Login/Register */}
+                {accessToken ? <AppTabs /> : <AuthStack />}
+            </NavigationContainer>
+        </View>
     );
 };

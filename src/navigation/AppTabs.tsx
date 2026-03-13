@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Target, DollarSign, Settings, Plus } from 'lucide-react-native';
-import { Animated, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { Home01Icon, Wallet01Icon, PiggyBankIcon, Settings01Icon, PlusSignIcon } from '@hugeicons/core-free-icons';
+import { Animated, Easing, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useNavigationState } from '@react-navigation/native';
+import { useNavigationState, useIsFocused } from '@react-navigation/native';
 
 // Screens
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
@@ -15,7 +16,6 @@ import { useThemeStore } from '../store/themeStore';
 import { AddExpenseSheet } from '../components/AddExpenseSheet';
 import { AddBudgetSheet } from '../components/AddBudgetSheet';
 import { AddSavingsSheet } from '../components/AddSavingsSheet';
-import { getStyle } from 'react-native-svg/lib/typescript/xml';
 
 export type AppTabParamList = {
     Home: undefined;
@@ -42,23 +42,85 @@ const SettingsStackScreen = () => {
     );
 };
 
-// Animated Tab Icon Component
-const AnimatedTabIcon = ({ focused, Icon, color }: any) => {
+// Slide-in animation HOC — wraps each screen with a smooth slide+fade on focus
+const withSlideAnimation = (Component: React.ComponentType<any>) => {
+    return (props: any) => {
+        const isFocused = useIsFocused();
+        const translateX = React.useRef(new Animated.Value(0)).current;
+        const opacity = React.useRef(new Animated.Value(1)).current;
+
+        React.useEffect(() => {
+            if (isFocused) {
+                translateX.setValue(22);
+                opacity.setValue(0);
+                Animated.parallel([
+                    Animated.timing(translateX, {
+                        toValue: 0,
+                        duration: 230,
+                        easing: Easing.out(Easing.quad),
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(opacity, {
+                        toValue: 1,
+                        duration: 200,
+                        useNativeDriver: true,
+                    }),
+                ]).start();
+            }
+        }, [isFocused]);
+
+        return (
+            <Animated.View style={{ flex: 1, transform: [{ translateX }], opacity }}>
+                <Component {...props} />
+            </Animated.View>
+        );
+    };
+};
+
+// Animated screen variants
+const AnimatedDashboard = withSlideAnimation(DashboardScreen);
+const AnimatedBudgets = withSlideAnimation(BudgetsScreen);
+const AnimatedSavings = withSlideAnimation(SavingsScreen);
+const AnimatedSettings = withSlideAnimation(SettingsStackScreen);
+
+// Bouncy Tab Button — triggers bounce immediately on press via tabBarButton
+const BouncyTabButton = ({ children, onPress, style, accessibilityRole, accessibilityState, accessibilityLabel, testID }: any) => {
     const scale = React.useRef(new Animated.Value(1)).current;
 
-    React.useEffect(() => {
-        Animated.spring(scale, {
-            toValue: focused ? 1.15 : 1,
-            damping: 15,
-            stiffness: 150,
-            useNativeDriver: true,
-        }).start();
-    }, [focused]);
+    const handlePress = () => {
+        scale.stopAnimation();
+        Animated.sequence([
+            Animated.timing(scale, {
+                toValue: 0.82,
+                duration: 70,
+                easing: Easing.in(Easing.quad),
+                useNativeDriver: true,
+            }),
+            Animated.spring(scale, {
+                toValue: 1,
+                damping: 8,
+                stiffness: 300,
+                mass: 0.5,
+                useNativeDriver: true,
+            }),
+        ]).start();
+        onPress?.();
+    };
 
     return (
-        <Animated.View style={{ transform: [{ scale }] }}>
-            <Icon color={color} size={24} />
-        </Animated.View>
+        <TouchableOpacity
+            activeOpacity={1}
+            onPress={handlePress}
+            style={style}
+            accessibilityRole={accessibilityRole}
+            accessibilityState={accessibilityState}
+            accessibilityLabel={accessibilityLabel}
+            testID={testID}
+        >
+            <Animated.View style={{ transform: [{ scale }], flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                {children}
+            </Animated.View>
+        </TouchableOpacity>
     );
 };
 
@@ -67,11 +129,11 @@ const CenterFloatingButton = ({ onPress, theme, styles }: any) => {
     return (
         <View style={styles.centerButtonContainer}>
             <TouchableOpacity
-                style={[styles.centerButton, { backgroundColor: theme.card }]}
+                style={[styles.centerButton, { backgroundColor: theme.teal }]}
                 onPress={onPress}
                 activeOpacity={0.8}
             >
-                <Plus color={theme.primary} size={32} strokeWidth={2.5} />
+                <HugeiconsIcon icon={PlusSignIcon} color={theme.primary} size={32} strokeWidth={2.5} />
             </TouchableOpacity>
         </View>
     );
@@ -112,37 +174,36 @@ export const AppTabs = () => {
                 initialRouteName="Home"
                 screenOptions={{
                     headerShown: false,
-                    tabBarActiveTintColor: theme.primary,
+                    tabBarActiveTintColor: theme.surface,
                     tabBarInactiveTintColor: theme.tabBarInactive,
                     tabBarStyle: {
-                        backgroundColor: theme.tabBar,
-                        borderTopColor: theme.border,
-                        borderTopWidth: 1,
-                        height: 60,
+                        backgroundColor: theme.primary,
+                        height: 64,
                         paddingBottom: 8,
                         paddingTop: 8,
+                        borderRadius: 24,
+                        borderWidth: 0,
                     },
-                    tabBarLabelStyle: {
-                        fontSize: 12,
-                        fontWeight: '600',
-                    },
+                    // tabBarShowLabel: false,
                 }}
             >
                 <Tab.Screen
-                    name="Budgets"
-                    component={BudgetsScreen}
+                    name="Home"
+                    component={AnimatedDashboard}
                     options={{
-                        tabBarIcon: ({ color, focused }) => (
-                            <AnimatedTabIcon focused={focused} Icon={Target} color={color} />
+                        tabBarButton: (props) => <BouncyTabButton {...props} />,
+                        tabBarIcon: ({ color }) => (
+                            <HugeiconsIcon icon={Home01Icon} color={color} size={24} strokeWidth={1.8} />
                         ),
                     }}
                 />
                 <Tab.Screen
-                    name="Savings"
-                    component={SavingsScreen}
+                    name="Budgets"
+                    component={AnimatedBudgets}
                     options={{
-                        tabBarIcon: ({ color, focused }) => (
-                            <AnimatedTabIcon focused={focused} Icon={DollarSign} color={color} />
+                        tabBarButton: (props) => <BouncyTabButton {...props} />,
+                        tabBarIcon: ({ color }) => (
+                            <HugeiconsIcon icon={Wallet01Icon} color={color} size={24} strokeWidth={1.8} />
                         ),
                     }}
                 />
@@ -159,25 +220,28 @@ export const AppTabs = () => {
                         tabBarIcon: () => null,
                         tabBarLabel: () => null,
                         tabBarButton: (props) => (
-                            <CenterFloatingButton onPress={handleCenterButtonPress} theme={theme} styles={styles.centerButton} />
+                            <CenterFloatingButton onPress={handleCenterButtonPress} theme={theme} styles={styles} />
                         ),
                     }}
                 />
                 <Tab.Screen
-                    name="Home"
-                    component={DashboardScreen}
+                    name="Savings"
+                    component={AnimatedSavings}
                     options={{
-                        tabBarIcon: ({ color, focused }) => (
-                            <AnimatedTabIcon focused={focused} Icon={Home} color={color} />
+                        tabBarButton: (props) => <BouncyTabButton {...props} />,
+                        tabBarIcon: ({ color }) => (
+                            <HugeiconsIcon icon={PiggyBankIcon} color={color} size={24} strokeWidth={1.8} />
                         ),
                     }}
                 />
+
                 <Tab.Screen
                     name="Settings"
-                    component={SettingsStackScreen}
+                    component={AnimatedSettings}
                     options={{
-                        tabBarIcon: ({ color, focused }) => (
-                            <AnimatedTabIcon focused={focused} Icon={Settings} color={color} />
+                        tabBarButton: (props) => <BouncyTabButton {...props} />,
+                        tabBarIcon: ({ color }) => (
+                            <HugeiconsIcon icon={Settings01Icon} color={color} size={24} strokeWidth={1.8} />
                         ),
                     }}
                 />
@@ -205,16 +269,14 @@ const getStyles = (theme: any) => StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingBottom: 20,
     },
     centerButton: {
         width: 56,
         height: 56,
-        borderRadius: 28,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 4,
         borderColor: theme.tabBar,
+        borderRadius: 16,
         // elevation: 8,
         // shadowColor: '#000',
         // shadowOffset: {
@@ -223,6 +285,6 @@ const getStyles = (theme: any) => StyleSheet.create({
         // },
         // shadowOpacity: 0.3,
         // shadowRadius: 4.65,
-        marginBottom: 10,
+        // marginBottom: 10,
     },
 });

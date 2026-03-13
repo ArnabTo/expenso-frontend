@@ -1,13 +1,18 @@
 import React, { useCallback } from 'react';
-import { FlatList, RefreshControl, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { FlatList, RefreshControl, View, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { Text } from '@gluestack-ui/themed';
 import { useFocusEffect } from '@react-navigation/native';
 import { useBudgets } from '../../hooks/useBudgets';
 import { useThemeStore } from '../../store/themeStore';
 import { ThemeToggler } from '../../components/ThemeToggler';
+import { fonts } from '../../theme/typography';
 
 export default function BudgetsScreen() {
     const { theme } = useThemeStore();
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 600;
+    const cardPadding = isTablet ? 24 : 16;
+    const iconSize = isTablet ? 52 : 40;
     const date = new Date();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
@@ -32,33 +37,72 @@ export default function BudgetsScreen() {
     const renderItem = ({ item }: { item: any }) => {
         const percent = item.percentage || 0;
         const isOver = percent > 100;
-        const barColor = isOver ? theme.error : (percent > 85 ? theme.warning : theme.primary);
+        const barColor = isOver ? theme.error : (percent > 85 ? theme.warning : theme.secondary);
 
         return (
-            <View style={[styles.budgetCard, { backgroundColor: theme.card }]}>
+            <View style={[
+                styles.budgetCard,
+                {
+                    backgroundColor: theme.card,
+                    padding: cardPadding,
+                    borderRadius: isTablet ? 20 : 16,
+                }
+            ]}>
                 <View style={styles.cardHeader}>
                     <View style={styles.categoryInfo}>
-                        <View style={[styles.categoryIcon, { backgroundColor: `${theme.primary}20` }]}>
-                            <Text style={{ color: theme.primary, fontSize: 18, fontWeight: 'bold' }}>
+                        <View style={[
+                            styles.categoryIcon,
+                            {
+                                backgroundColor: `${theme.secondary}20`,
+                                width: iconSize,
+                                height: iconSize,
+                                borderRadius: isTablet ? 16 : 12,
+                            }
+                        ]}>
+                            <Text style={{
+                                color: theme.secondary,
+                                fontSize: isTablet ? 22 : 18,
+                                fontFamily: fonts.headingBold,
+                            }}>
                                 {item.category_detail?.name?.charAt(0) || 'C'}
                             </Text>
                         </View>
-                        <Text style={[styles.categoryName, { color: theme.text }]}>
+                        <Text style={[styles.categoryName, {
+                            color: theme.text,
+                            fontSize: isTablet ? 18 : 16,
+                            fontFamily: fonts.semiBold,
+                        }]}>
                             {item.category_detail?.name || 'Category'}
                         </Text>
                     </View>
-                    <Text style={[styles.amountText, { color: theme.text }]}>
-                        ৳{typeof item.spent === 'number' ? item.spent.toFixed(2) : '0.00'} / ৳{item.amount || '0.00'}
+                    <Text style={[styles.amountText, {
+                        color: theme.text,
+                        fontSize: isTablet ? 15 : 13,
+                        fontFamily: fonts.semiBold,
+                    }]}>
+                        ৳{typeof item.spent === 'number' ? item.spent.toFixed(2) : '0.00'}{' '}/ ৳{item.amount || '0.00'}
                     </Text>
                 </View>
 
-                <View style={[styles.progressBar, { backgroundColor: theme.border }]}>
+                <View style={[styles.progressBar, {
+                    backgroundColor: theme.border,
+                    height: isTablet ? 10 : 8,
+                    marginBottom: isTablet ? 12 : 8,
+                }]}>
                     <View style={[styles.progressFill, { width: `${Math.min(percent, 100)}%`, backgroundColor: barColor }]} />
                 </View>
 
                 <View style={styles.cardFooter}>
-                    <Text style={[styles.percentText, { color: theme.textSecondary }]}>{Math.round(percent)}% Used</Text>
-                    <Text style={[styles.remainingText, { color: isOver ? theme.error : theme.success }]}>
+                    <Text style={[styles.percentText, {
+                        color: theme.textSecondary,
+                        fontSize: isTablet ? 14 : 12,
+                        fontFamily: fonts.regular,
+                    }]}>{Math.round(percent)}% Used</Text>
+                    <Text style={[styles.remainingText, {
+                        color: isOver ? theme.error : theme.success,
+                        fontSize: isTablet ? 14 : 12,
+                        fontFamily: fonts.semiBold,
+                    }]}>
                         {isOver
                             ? `Over by ৳${typeof item.remaining === 'number' ? Math.abs(item.remaining).toFixed(2) : '0.00'}`
                             : `৳${typeof item.remaining === 'number' ? item.remaining.toFixed(2) : '0.00'} Left`}
@@ -71,10 +115,18 @@ export default function BudgetsScreen() {
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { paddingHorizontal: isTablet ? 32 : 20 }]}>
                 <View>
-                    <Text style={[styles.headerTitle, { color: theme.text }]}>Budgets</Text>
-                    <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
+                    <Text style={[styles.headerTitle, {
+                        color: theme.text,
+                        fontSize: isTablet ? 34 : 28,
+                        fontFamily: fonts.headingBold,
+                    }]}>Budgets</Text>
+                    <Text style={[styles.headerSubtitle, {
+                        color: theme.textSecondary,
+                        fontSize: isTablet ? 16 : 14,
+                        fontFamily: fonts.regular,
+                    }]}>
                         {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </Text>
                 </View>
@@ -85,12 +137,15 @@ export default function BudgetsScreen() {
                 data={budgets}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
-                contentContainerStyle={styles.listContent}
+                numColumns={isTablet ? 2 : 1}
+                key={isTablet ? 'tablet' : 'phone'}
+                columnWrapperStyle={isTablet ? { gap: 16 } : undefined}
+                contentContainerStyle={[styles.listContent, { padding: isTablet ? 32 : 20 }]}
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefetching}
                         onRefresh={refetch}
-                        tintColor={theme.primary}
+                        tintColor={theme.secondary}
                     />
                 }
                 ListEmptyComponent={
@@ -118,25 +173,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
         paddingTop: 60,
         paddingBottom: 20,
     },
     headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
         marginBottom: 4,
     },
-    headerSubtitle: {
-        fontSize: 14,
-    },
+    headerSubtitle: {},
     listContent: {
-        padding: 20,
         paddingBottom: 100,
     },
     budgetCard: {
-        padding: 16,
-        borderRadius: 16,
+        flex: 1,
         marginBottom: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -156,27 +204,16 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     categoryIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
     },
-    categoryName: {
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    amountText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
+    categoryName: {},
+    amountText: {},
     progressBar: {
         width: '100%',
-        height: 8,
         borderRadius: 4,
         overflow: 'hidden',
-        marginBottom: 8,
     },
     progressFill: {
         height: '100%',
@@ -185,13 +222,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    percentText: {
-        fontSize: 12,
-    },
-    remainingText: {
-        fontSize: 12,
-        fontWeight: '600',
-    },
+    percentText: {},
+    remainingText: {},
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',

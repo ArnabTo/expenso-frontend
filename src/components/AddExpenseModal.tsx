@@ -31,7 +31,8 @@ import {
     ToastTitle,
     useToast,
 } from '@gluestack-ui/themed';
-import { ChevronDown } from 'lucide-react-native';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
 import { useCategories, useAddExpense } from '../hooks/useExpenses';
 
 interface AddExpenseModalProps {
@@ -152,7 +153,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({ visible, onClo
                                 <SelectTrigger variant="outline" size="md">
                                     <SelectInput placeholder="Select Category" />
                                     <SelectIcon mr="$3">
-                                        <ChevronDown />
+                                        <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
                                     </SelectIcon>
                                 </SelectTrigger>
                                 <SelectPortal>

@@ -116,7 +116,7 @@ export const AddSavingsSheet: React.FC<AddSavingsSheetProps> = ({ visible, onClo
                 <TouchableOpacity
                     onPress={handleSubmit}
                     disabled={isSubmitting}
-                    style={[styles.submitButton, { backgroundColor: theme.primary, opacity: isSubmitting ? 0.6 : 1 }]}
+                    style={[styles.submitButton, { backgroundColor: theme.secondary, opacity: isSubmitting ? 0.6 : 1 }]}
                 >
                     <Text style={styles.submitButtonText}>
                         {isSubmitting ? 'Creating...' : 'Create Savings Goal'}

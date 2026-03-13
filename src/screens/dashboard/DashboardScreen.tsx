@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react';
 import { RefreshControl, ScrollView, View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Text } from '@gluestack-ui/themed';
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react-native';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ChartIncreaseIcon, ChartDecreaseIcon, Wallet01Icon } from '@hugeicons/core-free-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuthStore } from '../../store/authStore';
 import { useMonthlyReport } from '../../hooks/useAnalytics';
@@ -82,7 +83,7 @@ export default function DashboardScreen() {
                                     ? theme.error
                                     : summary.budget_utilized_percentage > 70
                                         ? theme.warning
-                                        : theme.primary
+                                        : theme.secondary
                             }
                             backgroundColor={`${theme.border}80`}
                             text={`${summary.budget_utilized_percentage}%`}
@@ -111,30 +112,30 @@ export default function DashboardScreen() {
 
                 {/* Summary Cards */}
                 <View style={styles.summaryGrid}>
-                    <View style={[styles.summaryCard, { backgroundColor: theme.primary }]}>
+                    <View style={[styles.summaryCard, { backgroundColor: theme.secondary }]}>
                         <View style={styles.summaryIconContainer}>
-                            <Wallet color="#FFFFFF" size={24} />
+                            <HugeiconsIcon icon={Wallet01Icon} size={24} color="#FFFFFF" />
                         </View>
                         <Text style={styles.summaryLabel}>This Month</Text>
                         <Text style={styles.summaryValue}>
                             ৳{typeof summary.total_expenses === 'number' ? summary.total_expenses.toFixed(2) : '0.00'}
                         </Text>
                         <View style={styles.trendContainer}>
-                            <TrendingUp color="#FFFFFF" size={16} />
+                            <HugeiconsIcon icon={ChartIncreaseIcon} size={16} color="#FFFFFF" />
                             <Text style={styles.trendText}>+12%</Text>
                         </View>
                     </View>
 
                     <View style={[styles.summaryCard, { backgroundColor: theme.success }]}>
                         <View style={styles.summaryIconContainer}>
-                            <TrendingDown color="#FFFFFF" size={24} />
+                            <HugeiconsIcon icon={ChartDecreaseIcon} size={24} color="#FFFFFF" />
                         </View>
                         <Text style={styles.summaryLabel}>Saved</Text>
                         <Text style={styles.summaryValue}>
                             ৳{typeof summary.total_saved === 'number' ? summary.total_saved.toFixed(2) : '0.00'}
                         </Text>
                         <View style={styles.trendContainer}>
-                            <TrendingUp color="#FFFFFF" size={16} />
+                            <HugeiconsIcon icon={ChartIncreaseIcon} size={16} color="#FFFFFF" />
                             <Text style={styles.trendText}>+8%</Text>
                         </View>
                     </View>
@@ -164,8 +165,8 @@ export default function DashboardScreen() {
                                 style={[styles.expenseItem, { backgroundColor: theme.card }]}
                             >
                                 <View style={styles.expenseLeft}>
-                                    <View style={[styles.expenseIcon, { backgroundColor: `${theme.primary}20` }]}>
-                                        <Text style={{ color: theme.primary, fontSize: 18 }}>
+                                    <View style={[styles.expenseIcon, { backgroundColor: `${theme.secondary}20` }]}>
+                                        <Text style={{ color: theme.secondary, fontSize: 18 }}>
                                             {expense.title?.charAt(0) || '?'}
                                         </Text>
                                     </View>
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 60,
+        paddingTop: 20,
         paddingBottom: 20,
     },
     headerLeft: {

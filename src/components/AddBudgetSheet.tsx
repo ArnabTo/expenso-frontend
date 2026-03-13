@@ -89,8 +89,8 @@ export const AddBudgetSheet: React.FC<AddBudgetSheetProps> = ({ visible, onClose
                                 style={[
                                     styles.categoryChip,
                                     {
-                                        backgroundColor: category === cat.id.toString() ? theme.primary : theme.background,
-                                        borderColor: category === cat.id.toString() ? theme.primary : theme.border,
+                                        backgroundColor: category === cat.id.toString() ? theme.secondary : theme.background,
+                                        borderColor: category === cat.id.toString() ? theme.secondary : theme.border,
                                     },
                                 ]}
                             >
@@ -131,8 +131,8 @@ export const AddBudgetSheet: React.FC<AddBudgetSheetProps> = ({ visible, onClose
                                 style={[
                                     styles.monthChip,
                                     {
-                                        backgroundColor: month === m.value ? theme.primary : theme.background,
-                                        borderColor: month === m.value ? theme.primary : theme.border,
+                                        backgroundColor: month === m.value ? theme.secondary : theme.background,
+                                        borderColor: month === m.value ? theme.secondary : theme.border,
                                     },
                                 ]}
                             >
@@ -166,7 +166,7 @@ export const AddBudgetSheet: React.FC<AddBudgetSheetProps> = ({ visible, onClose
                 <TouchableOpacity
                     onPress={handleSubmit}
                     disabled={isSubmitting}
-                    style={[styles.submitButton, { backgroundColor: theme.primary, opacity: isSubmitting ? 0.6 : 1 }]}
+                    style={[styles.submitButton, { backgroundColor: theme.secondary, opacity: isSubmitting ? 0.6 : 1 }]}
                 >
                     <Text style={styles.submitButtonText}>
                         {isSubmitting ? 'Setting...' : 'Set Budget'}

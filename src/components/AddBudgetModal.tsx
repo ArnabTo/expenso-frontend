@@ -31,7 +31,8 @@ import {
     ToastTitle,
     useToast,
 } from '@gluestack-ui/themed';
-import { ChevronDown } from 'lucide-react-native';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
 import { useCategories } from '../hooks/useExpenses';
 import { useAddBudget } from '../hooks/useBudgets';
 
@@ -130,7 +131,7 @@ export const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ visible, onClose
                                 <SelectTrigger variant="outline" size="md">
                                     <SelectInput placeholder="Select Category" />
                                     <SelectIcon marginRight="$3">
-                                        <ChevronDown />
+                                        <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
                                     </SelectIcon>
                                 </SelectTrigger>
                                 <SelectPortal>
@@ -169,7 +170,7 @@ export const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ visible, onClose
                                 <SelectTrigger variant="outline" size="md">
                                     <SelectInput placeholder="Select Month" />
                                     <SelectIcon marginRight="$3">
-                                        <ChevronDown />
+                                        <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
                                     </SelectIcon>
                                 </SelectTrigger>
                                 <SelectPortal>

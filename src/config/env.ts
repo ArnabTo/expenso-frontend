@@ -10,8 +10,8 @@ const getEnvConfig = (): EnvConfig => {
 
     // Default to localhost if no config is provided
     const defaultUrl = __DEV__
-        ? 'http://192.168.0.193:8090'  // Change this to your computer's IP
-        : 'https://your-production-api.com';  // Production API URL
+        ? 'http://192.168.0.199:8090'  // Change this to your computer's IP
+        : 'https://expenso-backend-xecz.onrender.com';  // Production API URL
 
     return {
         API_BASE_URL: extra?.API_BASE_URL || defaultUrl,

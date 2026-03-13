@@ -40,7 +40,7 @@ export default function SavingsScreen() {
                         </Text>
                     </View>
                     <View style={styles.rightSection}>
-                        <Text style={[styles.savedAmount, { color: theme.primary }]}>
+                        <Text style={[styles.savedAmount, { color: theme.secondary }]}>
                             ${item.current_amount || item.total_saved || 0}
                         </Text>
                         <Text style={[styles.targetAmount, { color: theme.textSecondary }]}>
@@ -94,7 +94,7 @@ export default function SavingsScreen() {
                     <RefreshControl
                         refreshing={isRefetching}
                         onRefresh={refetch}
-                        tintColor={theme.primary}
+                        tintColor={theme.secondary}
                     />
                 }
                 ListEmptyComponent={

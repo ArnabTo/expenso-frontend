@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Animated, StyleSheet } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { PlusSignIcon } from '@hugeicons/core-free-icons';
 import { useThemeStore } from '../store/themeStore';
 
 interface FloatingActionButtonProps {
@@ -41,9 +42,9 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPr
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 activeOpacity={0.9}
-                style={[styles.button, { backgroundColor: theme.primary }]}
+                style={[styles.button, { backgroundColor: theme.secondary }]}
             >
-                <Plus color="#FFFFFF" size={28} strokeWidth={2.5} />
+                <HugeiconsIcon icon={PlusSignIcon} size={28} color="#FFFFFF" />
             </TouchableOpacity>
         </Animated.View>
     );
