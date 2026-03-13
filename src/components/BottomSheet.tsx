@@ -24,7 +24,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     visible,
     onClose,
     children,
-    height = SCREEN_HEIGHT * 0.7,
+    height = SCREEN_HEIGHT * 0.9,
 }) => {
     const { theme } = useThemeStore();
     const translateY = React.useRef(new Animated.Value(height)).current;

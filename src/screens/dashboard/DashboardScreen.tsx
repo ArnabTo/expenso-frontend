@@ -1,17 +1,27 @@
-import React, { useCallback } from 'react';
-import { RefreshControl, ScrollView, View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+﻿import React, { useCallback, useState } from 'react';
+import {
+    RefreshControl, ScrollView, View, StyleSheet,
+    TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform,
+} from 'react-native';
 import { Text } from '@gluestack-ui/themed';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { ChartIncreaseIcon, ChartDecreaseIcon, Wallet01Icon } from '@hugeicons/core-free-icons';
+import { Edit02Icon, ListStartIcon, PiggyBankIcon, Wallet01Icon, ChartDecreaseIcon, ChartIncreaseIcon } from '@hugeicons/core-free-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuthStore } from '../../store/authStore';
 import { useMonthlyReport } from '../../hooks/useAnalytics';
-import { useExpenses } from '../../hooks/useExpenses';
+import { useExpenses, useUpdateBankBalance } from '../../hooks/useExpenses';
 import { useThemeStore } from '../../store/themeStore';
 import { ThemeToggler } from '../../components/ThemeToggler';
 import { CircularProgress } from '../../components/CircularProgress';
+import { fonts } from '../../theme/typography';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { HomeStackParamList } from '../../navigation/types';
 
-export default function DashboardScreen() {
+type Props = {
+    navigation: NativeStackNavigationProp<HomeStackParamList, 'Dashboard'>;
+};
+
+export default function DashboardScreen({ navigation }: Props) {
     const user = useAuthStore(state => state.user);
     const { theme } = useThemeStore();
 
@@ -21,8 +31,11 @@ export default function DashboardScreen() {
 
     const { data: report, isLoading, refetch, isRefetching } = useMonthlyReport(month, year);
     const { data: expenses, refetch: refetchExpenses } = useExpenses();
+    const updateBalance = useUpdateBankBalance();
 
-    // Refetch data when tab comes into focus
+    const [balanceModalVisible, setBalanceModalVisible] = useState(false);
+    const [balanceInput, setBalanceInput] = useState('');
+
     useFocusEffect(
         useCallback(() => {
             refetch();
@@ -34,20 +47,40 @@ export default function DashboardScreen() {
         total_expenses: 0,
         total_budgeted: 0,
         total_saved: 0,
-        budget_utilized_percentage: 0
+        bank_balance: 0,
+        budget_utilized_percentage: 0,
     };
 
-    // Get today's expenses
     const today = new Date().toISOString().split('T')[0];
     const todaysExpenses = expenses?.filter((exp: any) => exp.date === today) || [];
+
+    const handleUpdateBalance = () => {
+        const val = parseFloat(balanceInput);
+        if (!isNaN(val)) {
+            updateBalance.mutate(val, {
+                onSuccess: () => {
+                    setBalanceModalVisible(false);
+                    setBalanceInput('');
+                    refetch();
+                },
+            });
+        }
+    };
+
+    const fmt = (v: any) =>
+        typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2);
 
     if (isLoading) {
         return (
             <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
-                <Text style={{ color: theme.text }}>Loading...</Text>
+                <Text style={{ color: theme.text, fontFamily: fonts.regular }}>Loading...</Text>
             </View>
         );
     }
+
+    const percentage = Math.min(summary.budget_utilized_percentage, 100);
+    const progressColor =
+        percentage > 90 ? theme.error : percentage > 70 ? theme.warning : theme.teal;
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -56,105 +89,119 @@ export default function DashboardScreen() {
                 refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header with Theme Toggle */}
+                {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.headerLeft}>
-                        <Text style={[styles.greeting, { color: theme.textSecondary }]}>
+                        <Text style={[styles.greeting, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
                             Welcome back,
                         </Text>
-                        <Text style={[styles.username, { color: theme.text }]}>
+                        <Text style={[styles.username, { color: theme.text, fontFamily: fonts.headingBold }]}>
                             {user?.username || 'User'}
                         </Text>
                     </View>
                     <ThemeToggler />
                 </View>
 
-                {/* Circular Budget Card */}
+                {/* Budget Overview Card */}
                 <View style={[styles.budgetCard, { backgroundColor: theme.card }]}>
-                    <Text style={[styles.cardTitle, { color: theme.text }]}>Budget Overview</Text>
+                    <Text style={[styles.cardTitle, { color: theme.text, fontFamily: fonts.headingBold }]}>
+                        Budget Overview
+                    </Text>
 
                     <View style={styles.circularContainer}>
                         <CircularProgress
-                            size={160}
-                            strokeWidth={12}
-                            percentage={Math.min(summary.budget_utilized_percentage, 100)}
-                            color={
-                                summary.budget_utilized_percentage > 90
-                                    ? theme.error
-                                    : summary.budget_utilized_percentage > 70
-                                        ? theme.warning
-                                        : theme.secondary
-                            }
+                            size={150}
+                            strokeWidth={11}
+                            percentage={percentage}
+                            color={progressColor}
                             backgroundColor={`${theme.border}80`}
                             text={`${summary.budget_utilized_percentage}%`}
                         />
+                        <Text style={[styles.utilLabel, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
+                            Budget Utilised
+                        </Text>
                     </View>
 
-                    <View style={styles.budgetDetails}>
-                        <View style={styles.budgetRow}>
-                            <Text style={[styles.budgetLabel, { color: theme.textSecondary }]}>
-                                Spent
-                            </Text>
-                            <Text style={[styles.budgetValue, { color: theme.text }]}>
-                                ৳{typeof summary.total_expenses === 'number' ? summary.total_expenses.toFixed(2) : '0.00'}
+                    {/* 2x2 Stats Grid */}
+                    <View style={styles.statsGrid}>
+                        <View style={[styles.statCell, { borderColor: theme.border }]}>
+                            <View style={styles.statIconRow}>
+                                <HugeiconsIcon icon={Wallet01Icon} size={16} color={theme.teal} />
+                                <Text style={[styles.statLabel, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
+                                    Budget
+                                </Text>
+                            </View>
+                            <Text style={[styles.statValue, { color: theme.text, fontFamily: fonts.bold }]}>
+                                {'\u09F3'}{fmt(summary.total_budgeted)}
                             </Text>
                         </View>
-                        <View style={styles.budgetRow}>
-                            <Text style={[styles.budgetLabel, { color: theme.textSecondary }]}>
-                                Budget
+
+                        <View style={[styles.statCell, { borderColor: theme.border }]}>
+                            <View style={styles.statIconRow}>
+                                <HugeiconsIcon icon={ChartIncreaseIcon} size={16} color={theme.error} />
+                                <Text style={[styles.statLabel, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
+                                    Expenses
+                                </Text>
+                            </View>
+                            <Text style={[styles.statValue, { color: theme.error, fontFamily: fonts.bold }]}>
+                                {'\u09F3'}{fmt(summary.total_expenses)}
                             </Text>
-                            <Text style={[styles.budgetValue, { color: theme.text }]}>
-                                ৳{typeof summary.total_budgeted === 'number' ? summary.total_budgeted.toFixed(2) : '0.00'}
+                        </View>
+
+                        <View style={[styles.statCell, { borderColor: theme.border }]}>
+                            <View style={styles.statIconRow}>
+                                <HugeiconsIcon icon={ChartDecreaseIcon} size={16} color={theme.info} />
+                                <Text style={[styles.statLabel, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
+                                    Balance
+                                </Text>
+                                <TouchableOpacity
+                                    style={styles.editBtn}
+                                    onPress={() => {
+                                        setBalanceInput(String(summary.bank_balance));
+                                        setBalanceModalVisible(true);
+                                    }}
+                                >
+                                    <HugeiconsIcon icon={Edit02Icon} size={13} color={theme.textSecondary} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={[styles.statValue, { color: theme.info, fontFamily: fonts.bold }]}>
+                                {'\u09F3'}{fmt(summary.bank_balance)}
+                            </Text>
+                        </View>
+
+                        <View style={[styles.statCell, { borderColor: theme.border }]}>
+                            <View style={styles.statIconRow}>
+                                <HugeiconsIcon icon={PiggyBankIcon} size={16} color={theme.success} />
+                                <Text style={[styles.statLabel, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
+                                    Savings
+                                </Text>
+                            </View>
+                            <Text style={[styles.statValue, { color: theme.success, fontFamily: fonts.bold }]}>
+                                {'\u09F3'}{fmt(summary.total_saved)}
                             </Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Summary Cards */}
-                <View style={styles.summaryGrid}>
-                    <View style={[styles.summaryCard, { backgroundColor: theme.secondary }]}>
-                        <View style={styles.summaryIconContainer}>
-                            <HugeiconsIcon icon={Wallet01Icon} size={24} color="#FFFFFF" />
-                        </View>
-                        <Text style={styles.summaryLabel}>This Month</Text>
-                        <Text style={styles.summaryValue}>
-                            ৳{typeof summary.total_expenses === 'number' ? summary.total_expenses.toFixed(2) : '0.00'}
-                        </Text>
-                        <View style={styles.trendContainer}>
-                            <HugeiconsIcon icon={ChartIncreaseIcon} size={16} color="#FFFFFF" />
-                            <Text style={styles.trendText}>+12%</Text>
-                        </View>
-                    </View>
-
-                    <View style={[styles.summaryCard, { backgroundColor: theme.success }]}>
-                        <View style={styles.summaryIconContainer}>
-                            <HugeiconsIcon icon={ChartDecreaseIcon} size={24} color="#FFFFFF" />
-                        </View>
-                        <Text style={styles.summaryLabel}>Saved</Text>
-                        <Text style={styles.summaryValue}>
-                            ৳{typeof summary.total_saved === 'number' ? summary.total_saved.toFixed(2) : '0.00'}
-                        </Text>
-                        <View style={styles.trendContainer}>
-                            <HugeiconsIcon icon={ChartIncreaseIcon} size={16} color="#FFFFFF" />
-                            <Text style={styles.trendText}>+8%</Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Daily Expenses List */}
+                {/* Today's Expenses */}
                 <View style={styles.expensesSection}>
                     <View style={styles.sectionHeader}>
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                        <Text style={[styles.sectionTitle, { color: theme.text, fontFamily: fonts.headingBold }]}>
                             Today's Expenses
                         </Text>
-                        <Text style={[styles.sectionCount, { color: theme.textSecondary }]}>
-                            {todaysExpenses.length} items
-                        </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('AllExpenses')}>
+                            <View style={[styles.viewAllButton, { backgroundColor: theme.primary }]}>
+                                <HugeiconsIcon icon={ListStartIcon} size={14} color={theme.textInverse} />
+                                <Text style={{ color: theme.textInverse, fontSize: 12, fontFamily: fonts.semiBold }}>
+                                    View All
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
                     </View>
 
                     {todaysExpenses.length === 0 ? (
                         <View style={[styles.emptyState, { backgroundColor: theme.card }]}>
-                            <Text style={[styles.emptyStateText, { color: theme.textSecondary }]}>
+                            <Text style={[styles.emptyStateText, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
                                 No expenses today. Tap + to add one!
                             </Text>
                         </View>
@@ -165,207 +212,216 @@ export default function DashboardScreen() {
                                 style={[styles.expenseItem, { backgroundColor: theme.card }]}
                             >
                                 <View style={styles.expenseLeft}>
-                                    <View style={[styles.expenseIcon, { backgroundColor: `${theme.secondary}20` }]}>
-                                        <Text style={{ color: theme.secondary, fontSize: 18 }}>
-                                            {expense.title?.charAt(0) || '?'}
+                                    <View style={[styles.expenseIcon, { backgroundColor: `${theme.teal}20` }]}>
+                                        <Text style={{ color: theme.teal, fontSize: 18, fontFamily: fonts.bold }}>
+                                            {expense.title?.charAt(0)?.toUpperCase() || '?'}
                                         </Text>
                                     </View>
                                     <View style={styles.expenseInfo}>
-                                        <Text style={[styles.expenseTitle, { color: theme.text }]}>
+                                        <Text style={[styles.expenseTitle, { color: theme.text, fontFamily: fonts.bold }]}>
                                             {expense.title}
                                         </Text>
-                                        <Text style={[styles.expenseCategory, { color: theme.textSecondary }]}>
+                                        <Text style={[styles.expenseCategory, { color: theme.textSecondary, fontFamily: fonts.regular }]}>
                                             {expense.category_name || 'Uncategorized'}
                                         </Text>
                                     </View>
                                 </View>
-                                <Text style={[styles.expenseAmount, { color: theme.error }]}>
-                                    -৳{typeof expense?.amount === 'number' ? expense.amount.toFixed(2) : Number(expense?.amount).toFixed(2)}
+                                <Text style={[styles.expenseAmount, { color: theme.error, fontFamily: fonts.bold }]}>
+                                    -{'\u09F3'}{fmt(expense?.amount)}
                                 </Text>
                             </View>
                         ))
                     )}
                 </View>
 
-                {/* Bottom spacing */}
                 <View style={{ height: 100 }} />
             </ScrollView>
+
+            {/* Update Balance Modal */}
+            <Modal
+                visible={balanceModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setBalanceModalVisible(false)}
+            >
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.modalOverlay}
+                >
+                    <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+                        <Text style={[styles.modalTitle, { color: theme.text, fontFamily: fonts.headingBold }]}>
+                            Update Bank Balance
+                        </Text>
+                        <TextInput
+                            style={[styles.modalInput, {
+                                borderColor: theme.border,
+                                color: theme.text,
+                                fontFamily: fonts.regular,
+                                backgroundColor: theme.background,
+                            }]}
+                            keyboardType="numeric"
+                            placeholder="Enter balance"
+                            placeholderTextColor={theme.textSecondary}
+                            value={balanceInput}
+                            onChangeText={setBalanceInput}
+                            autoFocus
+                        />
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity
+                                style={[styles.modalBtn, { backgroundColor: theme.border }]}
+                                onPress={() => setBalanceModalVisible(false)}
+                            >
+                                <Text style={{ color: theme.text, fontFamily: fonts.semiBold }}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalBtn, { backgroundColor: theme.teal }]}
+                                onPress={handleUpdateBalance}
+                            >
+                                <Text style={{ color: '#fff', fontFamily: fonts.semiBold }}>Save</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scrollView: {
-        flex: 1,
-    },
+    container: { flex: 1 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    scrollView: { flex: 1 },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingTop: 20,
-        paddingBottom: 20,
+        paddingBottom: 16,
     },
-    headerLeft: {
-        flex: 1,
-    },
-    greeting: {
-        fontSize: 14,
-        marginBottom: 4,
-    },
-    username: {
-        fontSize: 28,
-        fontWeight: 'bold',
-    },
+    headerLeft: { flex: 1 },
+    greeting: { fontSize: 14, marginBottom: 2 },
+    username: { fontSize: 26, fontWeight: 'bold' },
     budgetCard: {
         marginHorizontal: 20,
-        marginBottom: 20,
+        marginBottom: 24,
         padding: 24,
-        borderRadius: 20,
+        borderRadius: 24,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
         elevation: 5,
     },
     cardTitle: {
-        fontSize: 18,
-        fontWeight: '600',
+        fontSize: 20,
+        fontWeight: '700',
         marginBottom: 20,
         textAlign: 'center',
     },
     circularContainer: {
         alignItems: 'center',
-        marginBottom: 20,
-    },
-    budgetDetails: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-    },
-    budgetRow: {
-        alignItems: 'center',
-    },
-    budgetLabel: {
-        fontSize: 13,
-        marginBottom: 4,
-    },
-    budgetValue: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    summaryGrid: {
-        flexDirection: 'row',
-        paddingHorizontal: 20,
-        gap: 12,
         marginBottom: 24,
     },
-    summaryCard: {
+    utilLabel: { fontSize: 12, marginTop: 8 },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+    },
+    statCell: {
         flex: 1,
-        padding: 20,
-        borderRadius: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        minWidth: '45%',
+        padding: 14,
+        borderRadius: 14,
+        borderWidth: 1,
     },
-    summaryIconContainer: {
-        marginBottom: 12,
-    },
-    summaryLabel: {
-        color: '#FFFFFF',
-        fontSize: 12,
-        opacity: 0.9,
-        marginBottom: 8,
-    },
-    summaryValue: {
-        color: '#FFFFFF',
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    trendContainer: {
+    statIconRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 5,
+        marginBottom: 8,
     },
-    trendText: {
-        color: '#FFFFFF',
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    expensesSection: {
-        paddingHorizontal: 20,
-    },
+    statLabel: { fontSize: 12, flex: 1 },
+    statValue: { fontSize: 18, fontWeight: 'bold' },
+    editBtn: { padding: 2 },
+    expensesSection: { paddingHorizontal: 20 },
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 16,
     },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    sectionCount: {
-        fontSize: 14,
+    sectionTitle: { fontSize: 20, fontWeight: 'bold' },
+    viewAllButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
     },
     emptyState: {
         padding: 40,
         borderRadius: 16,
         alignItems: 'center',
     },
-    emptyStateText: {
-        fontSize: 14,
-        textAlign: 'center',
-    },
+    emptyStateText: { fontSize: 14, textAlign: 'center' },
     expenseItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
-        borderRadius: 12,
-        marginBottom: 12,
+        borderRadius: 14,
+        marginBottom: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
-        shadowRadius: 2,
+        shadowRadius: 3,
         elevation: 1,
     },
-    expenseLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
+    expenseLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
     expenseIcon: {
-        width: 40,
-        height: 40,
+        width: 42,
+        height: 42,
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
     },
-    expenseInfo: {
+    expenseInfo: { flex: 1 },
+    expenseTitle: { fontSize: 15, fontWeight: '600', marginBottom: 2 },
+    expenseCategory: { fontSize: 13 },
+    expenseAmount: { fontSize: 16, fontWeight: 'bold' },
+    modalOverlay: {
         flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
     },
-    expenseTitle: {
+    modalBox: {
+        width: '100%',
+        borderRadius: 20,
+        padding: 24,
+    },
+    modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16 },
+    modalInput: {
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
         fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 2,
+        marginBottom: 20,
     },
-    expenseCategory: {
-        fontSize: 13,
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
     },
-    expenseAmount: {
-        fontSize: 16,
-        fontWeight: 'bold',
+    modalBtn: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        alignItems: 'center',
     },
 });

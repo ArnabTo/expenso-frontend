@@ -7,8 +7,9 @@ import {
     ScrollView,
     Alert,
     Modal,
+    Platform,
 } from 'react-native';
-import { Text } from '@gluestack-ui/themed';
+import { KeyboardAvoidingView, Text } from '@gluestack-ui/themed';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { PlusSignIcon, Cancel01Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons';
 import { BottomSheet } from './BottomSheet';
@@ -107,200 +108,206 @@ export const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({ visible, onClo
 
     return (
         <BottomSheet visible={visible} onClose={onClose}>
-            <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-                <Text style={[styles.title, { color: theme.text }]}>Add Expense</Text>
-
-                {/* Title Input */}
-                <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: theme.textSecondary }]}>Title *</Text>
-                    <TextInput
-                        style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                        placeholder="e.g., Grocery shopping"
-                        placeholderTextColor={theme.textSecondary}
-                        value={title}
-                        onChangeText={setTitle}
-                    />
-                </View>
-
-                {/* Amount Input */}
-                <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: theme.textSecondary }]}>Amount *</Text>
-                    <TextInput
-                        style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                        placeholder="0.00"
-                        placeholderTextColor={theme.textSecondary}
-                        value={amount}
-                        onChangeText={setAmount}
-                        keyboardType="decimal-pad"
-                    />
-                </View>
-
-                {/* Date Input */}
-                <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: theme.textSecondary }]}>Date *</Text>
-                    <TextInput
-                        style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                        placeholder="YYYY-MM-DD"
-                        placeholderTextColor={theme.textSecondary}
-                        value={date}
-                        onChangeText={setDate}
-                    />
-                </View>
-
-                {/* Category Dropdown */}
-                <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: theme.textSecondary }]}>Category *</Text>
-                    <TouchableOpacity
-                        onPress={() => setShowCategoryDropdown(true)}
-                        style={[
-                            styles.dropdownTrigger,
-                            { backgroundColor: theme.background, borderColor: theme.border },
-                        ]}
-                    >
-                        <Text style={[styles.dropdownText, { color: category ? theme.text : theme.textSecondary }]}>
-                            {selectedCategoryName}
-                        </Text>
-                        <HugeiconsIcon icon={ArrowDown01Icon} size={20} color={theme.textSecondary} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Note Input */}
-                <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: theme.textSecondary }]}>Note (Optional)</Text>
-                    <TextInput
-                        style={[
-                            styles.input,
-                            styles.textArea,
-                            { backgroundColor: theme.background, color: theme.text, borderColor: theme.border },
-                        ]}
-                        placeholder="Add a note..."
-                        placeholderTextColor={theme.textSecondary}
-                        value={note}
-                        onChangeText={setNote}
-                        multiline
-                        numberOfLines={3}
-                    />
-                </View>
-
-                {/* Submit Button */}
-                <TouchableOpacity
-                    onPress={handleSubmit}
-                    disabled={isSubmitting}
-                    style={[styles.submitButton, { backgroundColor: theme.secondary, opacity: isSubmitting ? 0.6 : 1 }]}
-                >
-                    <Text style={styles.submitButtonText}>
-                        {isSubmitting ? 'Adding...' : 'Add Expense'}
-                    </Text>
-                </TouchableOpacity>
-
-                {/* Bottom spacing */}
-                <View style={{ height: 40 }} />
-            </ScrollView>
-
-            {/* Category Dropdown Modal */}
-            <Modal
-                visible={showCategoryDropdown}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setShowCategoryDropdown(false)}
+            <KeyboardAvoidingView
+                style={styles.flex}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
-                <TouchableOpacity
-                    style={styles.dropdownOverlay}
-                    activeOpacity={1}
-                    onPress={() => setShowCategoryDropdown(false)}
-                >
-                    <TouchableOpacity activeOpacity={1}>
-                        <View style={[styles.dropdownContent, { backgroundColor: theme.surface }]}>
-                            <View style={styles.dropdownHeader}>
-                                <Text style={[styles.dropdownTitle, { color: theme.text }]}>Select Category</Text>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setShowCategoryDropdown(false);
-                                        setShowAddCategory(true);
-                                    }}
-                                    style={styles.addCategoryHeaderButton}
-                                >
-                                    <HugeiconsIcon icon={PlusSignIcon} size={18} color={theme.secondary} />
-                                    <Text style={[styles.addCategoryText, { color: theme.secondary }]}>Add New</Text>
-                                </TouchableOpacity>
-                            </View>
+                <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+                    <Text style={[styles.title, { color: theme.text }]}>Add Expense</Text>
 
-                            <ScrollView style={styles.dropdownList}>
-                                {categories?.map((cat: any) => (
+                    {/* Title Input */}
+                    <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>Title *</Text>
+                        <TextInput
+                            style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                            placeholder="e.g., Grocery shopping"
+                            placeholderTextColor={theme.textSecondary}
+                            value={title}
+                            onChangeText={setTitle}
+                        />
+                    </View>
+
+                    {/* Amount Input */}
+                    <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>Amount *</Text>
+                        <TextInput
+                            style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                            placeholder="0.00"
+                            placeholderTextColor={theme.textSecondary}
+                            value={amount}
+                            onChangeText={setAmount}
+                            keyboardType="decimal-pad"
+                        />
+                    </View>
+
+                    {/* Date Input */}
+                    <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>Date *</Text>
+                        <TextInput
+                            style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                            placeholder="YYYY-MM-DD"
+                            placeholderTextColor={theme.textSecondary}
+                            value={date}
+                            onChangeText={setDate}
+                            editable={Platform.OS === 'ios'}
+                        />
+                    </View>
+
+                    {/* Category Dropdown */}
+                    <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>Category *</Text>
+                        <TouchableOpacity
+                            onPress={() => setShowCategoryDropdown(true)}
+                            style={[
+                                styles.dropdownTrigger,
+                                { backgroundColor: theme.background, borderColor: theme.border },
+                            ]}
+                        >
+                            <Text style={[styles.dropdownText, { color: category ? theme.text : theme.textSecondary }]}>
+                                {selectedCategoryName}
+                            </Text>
+                            <HugeiconsIcon icon={ArrowDown01Icon} size={20} color={theme.textSecondary} />
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Note Input */}
+                    <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: theme.textSecondary }]}>Note (Optional)</Text>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                styles.textArea,
+                                { backgroundColor: theme.background, color: theme.text, borderColor: theme.border },
+                            ]}
+                            placeholder="Add a note..."
+                            placeholderTextColor={theme.textSecondary}
+                            value={note}
+                            onChangeText={setNote}
+                            multiline
+                            numberOfLines={3}
+                        />
+                    </View>
+
+                    {/* Submit Button */}
+                    <TouchableOpacity
+                        onPress={handleSubmit}
+                        disabled={isSubmitting}
+                        style={[styles.submitButton, { backgroundColor: theme.secondary, opacity: isSubmitting ? 0.6 : 1 }]}
+                    >
+                        <Text style={styles.submitButtonText}>
+                            {isSubmitting ? 'Adding...' : 'Add Expense'}
+                        </Text>
+                    </TouchableOpacity>
+
+                    {/* Bottom spacing */}
+                    <View style={{ height: 40 }} />
+                </ScrollView>
+
+                {/* Category Dropdown Modal */}
+                <Modal
+                    visible={showCategoryDropdown}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setShowCategoryDropdown(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.dropdownOverlay}
+                        activeOpacity={1}
+                        onPress={() => setShowCategoryDropdown(false)}
+                    >
+                        <TouchableOpacity activeOpacity={1}>
+                            <View style={[styles.dropdownContent, { backgroundColor: theme.surface }]}>
+                                <View style={styles.dropdownHeader}>
+                                    <Text style={[styles.dropdownTitle, { color: theme.text }]}>Select Category</Text>
                                     <TouchableOpacity
-                                        key={cat.id}
                                         onPress={() => {
-                                            setCategory(cat.id.toString());
                                             setShowCategoryDropdown(false);
+                                            setShowAddCategory(true);
                                         }}
-                                        style={[
-                                            styles.dropdownItem,
-                                            { borderBottomColor: theme.border },
-                                            category === cat.id.toString() && { backgroundColor: `${theme.secondary}10` },
-                                        ]}
+                                        style={styles.addCategoryHeaderButton}
                                     >
-                                        <Text
+                                        <HugeiconsIcon icon={PlusSignIcon} size={18} color={theme.secondary} />
+                                        <Text style={[styles.addCategoryText, { color: theme.secondary }]}>Add New</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <ScrollView style={styles.dropdownList}>
+                                    {categories?.map((cat: any) => (
+                                        <TouchableOpacity
+                                            key={cat.id}
+                                            onPress={() => {
+                                                setCategory(cat.id.toString());
+                                                setShowCategoryDropdown(false);
+                                            }}
                                             style={[
-                                                styles.dropdownItemText,
-                                                { color: category === cat.id.toString() ? theme.secondary : theme.text },
+                                                styles.dropdownItem,
+                                                { borderBottomColor: theme.border },
+                                                category === cat.id.toString() && { backgroundColor: `${theme.secondary}10` },
                                             ]}
                                         >
-                                            {cat.name}
-                                        </Text>
-                                        {category === cat.id.toString() && (
-                                            <View style={[styles.checkMark, { backgroundColor: theme.secondary }]} />
-                                        )}
-                                    </TouchableOpacity>
-                                ))}
-                            </ScrollView>
-                        </View>
+                                            <Text
+                                                style={[
+                                                    styles.dropdownItemText,
+                                                    { color: category === cat.id.toString() ? theme.secondary : theme.text },
+                                                ]}
+                                            >
+                                                {cat.name}
+                                            </Text>
+                                            {category === cat.id.toString() && (
+                                                <View style={[styles.checkMark, { backgroundColor: theme.secondary }]} />
+                                            )}
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+                        </TouchableOpacity>
                     </TouchableOpacity>
-                </TouchableOpacity>
-            </Modal>
+                </Modal>
 
-            {/* Add Category Modal */}
-            <Modal
-                visible={showAddCategory}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setShowAddCategory(false)}
-            >
-                <TouchableOpacity
-                    style={styles.dropdownOverlay}
-                    activeOpacity={1}
-                    onPress={() => setShowAddCategory(false)}
+                {/* Add Category Modal */}
+                <Modal
+                    visible={showAddCategory}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setShowAddCategory(false)}
                 >
-                    <TouchableOpacity activeOpacity={1}>
-                        <View style={[styles.addCategoryModal, { backgroundColor: theme.surface }]}>
-                            <View style={styles.modalHeader}>
-                                <Text style={[styles.modalTitle, { color: theme.text }]}>Add New Category</Text>
-                                <TouchableOpacity onPress={() => setShowAddCategory(false)}>
-                                    <HugeiconsIcon icon={Cancel01Icon} size={24} color={theme.textSecondary} />
+                    <TouchableOpacity
+                        style={styles.dropdownOverlay}
+                        activeOpacity={1}
+                        onPress={() => setShowAddCategory(false)}
+                    >
+                        <TouchableOpacity activeOpacity={1}>
+                            <View style={[styles.addCategoryModal, { backgroundColor: theme.surface }]}>
+                                <View style={styles.modalHeader}>
+                                    <Text style={[styles.modalTitle, { color: theme.text }]}>Add New Category</Text>
+                                    <TouchableOpacity onPress={() => setShowAddCategory(false)}>
+                                        <HugeiconsIcon icon={Cancel01Icon} size={24} color={theme.textSecondary} />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        { backgroundColor: theme.background, color: theme.text, borderColor: theme.border },
+                                    ]}
+                                    placeholder="Category name"
+                                    placeholderTextColor={theme.textSecondary}
+                                    value={newCategoryName}
+                                    onChangeText={setNewCategoryName}
+                                    autoFocus
+                                />
+
+                                <TouchableOpacity
+                                    onPress={handleAddCategory}
+                                    style={[styles.modalButton, { backgroundColor: theme.secondary }]}
+                                >
+                                    <Text style={styles.modalButtonText}>Add Category</Text>
                                 </TouchableOpacity>
                             </View>
-
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    { backgroundColor: theme.background, color: theme.text, borderColor: theme.border },
-                                ]}
-                                placeholder="Category name"
-                                placeholderTextColor={theme.textSecondary}
-                                value={newCategoryName}
-                                onChangeText={setNewCategoryName}
-                                autoFocus
-                            />
-
-                            <TouchableOpacity
-                                onPress={handleAddCategory}
-                                style={[styles.modalButton, { backgroundColor: theme.secondary }]}
-                            >
-                                <Text style={styles.modalButtonText}>Add Category</Text>
-                            </TouchableOpacity>
-                        </View>
+                        </TouchableOpacity>
                     </TouchableOpacity>
-                </TouchableOpacity>
-            </Modal>
+                </Modal>
+            </KeyboardAvoidingView>
         </BottomSheet>
     );
 };
@@ -309,6 +316,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    flex: { flex: 1 },
     title: {
         fontSize: 24,
         fontWeight: 'bold',

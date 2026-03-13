@@ -12,6 +12,7 @@ import BudgetsScreen from '../screens/budgets/BudgetsScreen';
 import SavingsScreen from '../screens/savings/SavingsScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import AnalyticsScreen from '../screens/analytics/AnalyticsScreen';
+import { HomeStack } from './HomeStack';
 import { useThemeStore } from '../store/themeStore';
 import { AddExpenseSheet } from '../components/AddExpenseSheet';
 import { AddBudgetSheet } from '../components/AddBudgetSheet';
@@ -78,7 +79,7 @@ const withSlideAnimation = (Component: React.ComponentType<any>) => {
 };
 
 // Animated screen variants
-const AnimatedDashboard = withSlideAnimation(DashboardScreen);
+const AnimatedHome = withSlideAnimation(HomeStack);
 const AnimatedBudgets = withSlideAnimation(BudgetsScreen);
 const AnimatedSavings = withSlideAnimation(SavingsScreen);
 const AnimatedSettings = withSlideAnimation(SettingsStackScreen);
@@ -189,7 +190,7 @@ export const AppTabs = () => {
             >
                 <Tab.Screen
                     name="Home"
-                    component={AnimatedDashboard}
+                    component={AnimatedHome}
                     options={{
                         tabBarButton: (props) => <BouncyTabButton {...props} />,
                         tabBarIcon: ({ color }) => (

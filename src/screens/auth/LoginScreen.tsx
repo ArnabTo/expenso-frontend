@@ -8,12 +8,15 @@ import { useThemeStore } from '../../store/themeStore';
 import { ThemeToggler } from '../../components/ThemeToggler';
 import { authService } from '../../services/auth';
 import { fonts } from '../../theme/typography';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ViewIcon, ViewOffSlashIcon } from '@hugeicons/core-free-icons';
 
 export default function LoginScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const { theme } = useThemeStore();
 
     const handleLogin = async () => {
@@ -99,22 +102,36 @@ export default function LoginScreen({ navigation }: any) {
                             <Text style={[styles.label, { color: theme.textSecondary, fontFamily: fonts.medium }]}>
                                 Password
                             </Text>
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor: theme.card,
-                                        borderColor: theme.border,
-                                        color: theme.text,
-                                        fontFamily: fonts.regular,
-                                    },
-                                ]}
-                                placeholder="••••••••"
-                                placeholderTextColor={theme.textSecondary}
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                            />
+                            <View style={styles.inputWrapper}>
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        styles.inputWithIcon,
+                                        {
+                                            backgroundColor: theme.card,
+                                            borderColor: theme.border,
+                                            color: theme.text,
+                                            fontFamily: fonts.regular,
+                                        },
+                                    ]}
+                                    placeholder="••••••••"
+                                    placeholderTextColor={theme.textSecondary}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={!showPassword}
+                                />
+                                <TouchableOpacity
+                                    style={styles.eyeButton}
+                                    onPress={() => setShowPassword(v => !v)}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                >
+                                    <HugeiconsIcon
+                                        icon={showPassword ? ViewOffSlashIcon : ViewIcon}
+                                        size={20}
+                                        color={theme.textSecondary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         {error ? (
@@ -198,12 +215,25 @@ const styles = StyleSheet.create({
     },
     fieldGroup: { gap: 6 },
     label: { fontSize: 13 },
+    inputWrapper: {
+        position: 'relative',
+    },
     input: {
         height: 52,
         borderWidth: 1,
         borderRadius: 12,
         paddingHorizontal: 16,
         fontSize: 15,
+    },
+    inputWithIcon: {
+        paddingRight: 48,
+    },
+    eyeButton: {
+        position: 'absolute',
+        right: 14,
+        top: 0,
+        bottom: 0,
+        justifyContent: 'center',
     },
     errorText: {
         fontSize: 13,

@@ -33,7 +33,14 @@ export const apiService = {
 
     // ============= Expenses APIs =============
     expenses: {
-        getAll: async (params?: { page?: number; page_size?: number }) => {
+        getAll: async (params?: {
+            page?: number;
+            page_size?: number;
+            start_date?: string;
+            end_date?: string;
+            month?: number;
+            year?: number;
+        }) => {
             const { data } = await api.get('/expenses/', { params });
             return data.results || data;
         },
@@ -204,6 +211,17 @@ export const apiService = {
 
         getCustom: async (startDate: string, endDate: string) => {
             const { data } = await api.get(`/reports/custom/?start_date=${startDate}&end_date=${endDate}`);
+            return data;
+        },
+    },
+
+    bankBalance: {
+        get: async () => {
+            const { data } = await api.get('/users/bank-balance/');
+            return data;
+        },
+        update: async (balance: number) => {
+            const { data } = await api.patch('/users/bank-balance/', { bank_balance: balance });
             return data;
         },
     },

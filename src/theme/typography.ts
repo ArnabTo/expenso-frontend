@@ -1,13 +1,16 @@
 // Font family constants — use these in StyleSheet fontFamily properties
 export const fonts = {
-    // Open Sans — body text, labels, descriptions
-    regular: 'OpenSans_400Regular',
-    medium: 'OpenSans_500Medium',
-    semiBold: 'OpenSans_600SemiBold',
-    bold: 'OpenSans_700Bold',
+    // Poppins — body text, labels, descriptions
+    regular: 'Poppins_400Regular',
+    medium: 'Poppins_500Medium',
+    semiBold: 'Poppins_600SemiBold',
+    bold: 'Poppins_700Bold',
 
-    // Montserrat — headings, titles, branding
+    // Montserrat — subheadings, headings, numbers, emphasis
+    black: 'Montserrat_700Bold',
+    subHeading: 'Montserrat_600SemiBold',
+    subHeadingBold: 'Montserrat_700Bold',
     heading: 'Montserrat_600SemiBold',
     headingBold: 'Montserrat_700Bold',
-    headingExtraBold: 'Montserrat_800ExtraBold',
+    headingExtraBold: 'Montserrat_700Bold',
 };

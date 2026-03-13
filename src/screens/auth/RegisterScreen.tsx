@@ -8,6 +8,8 @@ import { useThemeStore } from '../../store/themeStore';
 import { ThemeToggler } from '../../components/ThemeToggler';
 import { authService } from '../../services/auth';
 import { fonts } from '../../theme/typography';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ViewIcon, ViewOffSlashIcon } from '@hugeicons/core-free-icons';
 
 export default function RegisterScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
@@ -16,6 +18,8 @@ export default function RegisterScreen({ navigation }: any) {
     const [rePassword, setRePassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showRePassword, setShowRePassword] = useState(false);
     const { theme } = useThemeStore();
 
     const handleRegister = async () => {
@@ -122,26 +126,52 @@ export default function RegisterScreen({ navigation }: any) {
 
                         <View style={styles.fieldGroup}>
                             <Text style={[styles.label, { color: theme.textSecondary, fontFamily: fonts.medium }]}>Password</Text>
-                            <TextInput
-                                style={inputStyle}
-                                placeholder="••••••••"
-                                placeholderTextColor={theme.textSecondary}
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                            />
+                            <View style={styles.inputWrapper}>
+                                <TextInput
+                                    style={[...inputStyle, styles.inputWithIcon]}
+                                    placeholder="••••••••"
+                                    placeholderTextColor={theme.textSecondary}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={!showPassword}
+                                />
+                                <TouchableOpacity
+                                    style={styles.eyeButton}
+                                    onPress={() => setShowPassword(v => !v)}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                >
+                                    <HugeiconsIcon
+                                        icon={showPassword ? ViewOffSlashIcon : ViewIcon}
+                                        size={20}
+                                        color={theme.textSecondary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         <View style={styles.fieldGroup}>
                             <Text style={[styles.label, { color: theme.textSecondary, fontFamily: fonts.medium }]}>Confirm Password</Text>
-                            <TextInput
-                                style={inputStyle}
-                                placeholder="••••••••"
-                                placeholderTextColor={theme.textSecondary}
-                                value={rePassword}
-                                onChangeText={setRePassword}
-                                secureTextEntry
-                            />
+                            <View style={styles.inputWrapper}>
+                                <TextInput
+                                    style={[...inputStyle, styles.inputWithIcon]}
+                                    placeholder="••••••••"
+                                    placeholderTextColor={theme.textSecondary}
+                                    value={rePassword}
+                                    onChangeText={setRePassword}
+                                    secureTextEntry={!showRePassword}
+                                />
+                                <TouchableOpacity
+                                    style={styles.eyeButton}
+                                    onPress={() => setShowRePassword(v => !v)}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                >
+                                    <HugeiconsIcon
+                                        icon={showRePassword ? ViewOffSlashIcon : ViewIcon}
+                                        size={20}
+                                        color={theme.textSecondary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         {error ? (
@@ -153,7 +183,7 @@ export default function RegisterScreen({ navigation }: any) {
 
                     {/* CTA */}
                     <TouchableOpacity
-                        style={[styles.button, { backgroundColor: theme.teal, opacity: loading ? 0.75 : 1 }]}
+                        style={[styles.button, { backgroundColor: theme.primary, opacity: loading ? 0.75 : 1 }]}
                         onPress={handleRegister}
                         activeOpacity={0.85}
                         disabled={loading}
@@ -225,12 +255,25 @@ const styles = StyleSheet.create({
     },
     fieldGroup: { gap: 6 },
     label: { fontSize: 13 },
+    inputWrapper: {
+        position: 'relative',
+    },
     input: {
         height: 52,
         borderWidth: 1,
         borderRadius: 12,
         paddingHorizontal: 16,
         fontSize: 15,
+    },
+    inputWithIcon: {
+        paddingRight: 48,
+    },
+    eyeButton: {
+        position: 'absolute',
+        right: 14,
+        top: 0,
+        bottom: 0,
+        justifyContent: 'center',
     },
     errorText: {
         fontSize: 13,
@@ -242,11 +285,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
-        shadowColor: '#00BFA5',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 8,
-        elevation: 6,
     },
     buttonText: {
         color: '#fff',

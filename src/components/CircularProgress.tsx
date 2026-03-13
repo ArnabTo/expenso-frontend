@@ -58,6 +58,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
                         fontSize={size * 0.2}
                         fontWeight="bold"
                         fill={color}
+                        fontFamily="Montserrat_700Bold"
                     >
                         {text}
                     </SvgText>
